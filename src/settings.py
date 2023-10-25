@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -144,7 +145,7 @@ USE_TZ = True
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 STATIC_URL = '/static/'
-STATIC_ROOT = str(BASE_DIR / '/static')  # The folder where collectstatic command collects static files
+STATIC_ROOT = str(BASE_DIR / 'static')  # The folder where collectstatic command collects static files
 
 # Additional directories where static files can be found
 STATICFILES_DIRS = [
