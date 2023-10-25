@@ -1,0 +1,55 @@
+{% load compress %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paco Credit Union {% block title %}| Financial Freedom{% endblock title %}</title>
+    <link rel="shortcut icon" href="" type="image/x-icon">
+    <meta name="description" content="Paco Credit Union provide an opening of corporate multi-currency accounts to ensure the stable operation of company in the international market">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Jost:wght@700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.0/flowbite.min.css" rel="stylesheet" />
+
+    {% compress css %}
+    <link rel="stylesheet" href="{% static 'src/output.css' %}">
+    {% endcompress %}
+
+
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>    
+</head>
+<body class="bg-white font-poppins w-screen min-h-screen overflow-y-auto overflow-x-hidden">
+    {% block header %}
+    {% include 'snippets/header.html' %}
+    {% endblock header %}
+
+    {% block mobile %}
+    <header class="px-6 space-x-3 md:px-24 md:hidden w-screen fixed bottom-0 left-0 right-0 py-4 z-50 bg-white flex items-center justify-between">
+        <a href="/" class="font-medium duration-300 ease-in-out hover:border-2 hover:rounded-lg {% if request.path == '/' %}border-2 rounded-lg{% endif %} px-4 py-2 border-secondary text-sm"><span class="iconify text-xl" data-icon="ic:round-business-center"></span></a>
+        <a href="/personal" class="font-medium duration-300 ease-in-out px-4 py-2 hover:border-2 hover:rounded-lg {% if request.path == '/personal' %}border-2 rounded-lg{% endif %} border-secondary text-sm"><span class="iconify text-xl" data-icon="icon-park-solid:personal-collection"></span></a>
+        {% if not request.user.is_authenticated %}
+        <a href="/accounts/login/" class="lg:hidden flex bg-primary font-medium px-4 py-2 rounded-lg text-sm"><span class="iconify text-xl" data-icon="solar:login-3-bold"></span></a>
+        <a href="/accounts/register/" class="hidden lg:flex bg-primary font-medium px-4 py-2 rounded-lg text-sm"><span class="iconify text-xl" data-icon="medical-icon:registration"></span></a>
+        {% else %}
+        <a href="/accounts/logout/" class="lg:hidden flex bg-red-500 font-medium px-4 py-2 rounded-lg text-sm"><span class="iconify text-xl" data-icon="majesticons:logout"></span></a>
+        <a href="{% url 'accounts:user' request.user.id %}" class="lg:hidden flex bg-primary font-medium px-4 py-2 rounded-lg text-sm"><span class="iconify text-xl" data-icon="ph:user-duotone"></a>
+        {% endif %}
+    </header>
+    {% endblock mobile %}
+
+    <main class="pb-[82px] md:pb-0">
+        {% block content %}{% endblock content %}
+    </main>
+
+    {% block footer %}
+    {% include 'snippets/footer.html' %}
+    {% endblock footer %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.0/flowbite.min.js"></script>
+</body>
+</html>

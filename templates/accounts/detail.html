@@ -1,0 +1,353 @@
+{% extends '__dashbase.html' %}
+
+{% block title %}{{ block.super }} {{request.user.first_name}}{% endblock title %}
+
+{% block content %}
+<section class="w-full min-h-screen md:col-span-3 col-span-4 space-y-7 pb-8">
+    <div class="space-y-2 w-full">
+        <h1 class="text-3xl font-bold">
+            My Bank
+        </h1>
+        <div class="md:flex w-full py-2 shadow-sm md:space-x-5 md:space-y-0 space-y-4">
+            <div class="bg-white space-y-3 rounded-lg p-3 w-full md:w-80 flex-none">
+                <div class="flex items-center justify-between space-x-4">
+                    <strong class="text-secondary font-semibold">Documents in work</strong>
+                    <div class="px-3 rounded-lg bg-red-400 text-white p-2">
+                        28
+                    </div>
+                </div>
+                <div class="text-xs flex items-center space-x-4 justify-between">
+                    <div class="space-x-2 flex items-center">
+                        <span class="iconify" data-icon="carbon:pen"></span>
+                        <span>For signature</span>
+                    </div>
+                    <div class="px-3 rounded-lg bg-primary text-white p-2">
+                        22
+                    </div>
+                </div>
+                <div class="text-xs flex items-center space-x-4 justify-between">
+                    <div class="space-x-2 flex items-center">
+                        <span class="iconify" data-icon="carbon:pen"></span>
+                        <span>Rejected by the bank</span>
+                    </div>
+                    <div class="px-3 rounded-lg bg-primary text-white p-2">
+                        4
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white space-y-6 flex flex-col w-full rounded-lg p-3 justify-between">
+                <div>
+                    <strong class="block text-lg text-secondary font-semibold">My Finances</strong>
+                    <strong class="block text-base pt-2 text-secondary font-semibold">{{first_account.balance}} <span class="text-xs">{{first_account.currency}}</span></strong>    
+                </div>
+                <div class="text-sm flex flex-wrap items-center justify-between">
+                    <span>435 432 <span class="text-xs text-secondary/40">30 GBP</span></span>
+                    <span>435 432 <span class="text-xs text-secondary/40">30 GBP</span></span>
+                    <span>435 432 <span class="text-xs text-secondary/40">30 GBP</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% comment %} accounts {% endcomment %}
+    <div class="space-y-2 w-full">
+        <div class="flex items-center justify-between space-x-5">
+            <h1 class="text-xl font-bold">
+                Accounts
+            </h1>
+
+            <a href="" class="py-2 border border-secondary text-center px-6 rounded-lg">
+                New account
+            </a>
+        </div>
+        <div class="max-h-[420px] overflow-y-auto scrollbar-hide bg-white space-y-6 flex flex-col w-full rounded-lg p-3 justify-between">
+            {% for account in accounts %}
+            <div class="py-4 px-3 {% if not forloop.last %}border-b border-b-secondary/30{% endif %} flex flex-col md:flex-row space-y-4 md:space-y-0 md:items-center justify-between space-x-5">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 rounded-full flex items-center bg-primary text-white justify-center">
+                        <span class="iconify" data-icon="carbon:finance"></span>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <strong class="block font-semibold text-sm md:text-base">{{account.user.get_full_name}} {{account.account_type}}</strong>
+                        <strong class="block font-normal text-xs md:text-sm">QUN {{account.account_number}}</strong>
+                    </div>
+                </div>
+                <div class="space-x-3 flex items-center justify-between md:justify-normal">
+                    <strong class="text-2xl block font-bold">
+                        {{account.balance}}
+                    </strong>
+                    <span class="iconify" data-icon="ph:dots-three-vertical-bold"></span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% comment %} corporate cards {% endcomment %}
+    <div class="space-y-2 w-full">
+        <h1 class="text-xl font-bold">
+            Corporate cards
+        </h1>
+        <div class="min-h-[220px] flex overflow-x-auto scrollbar-hide w-full rounded-lg py-3 items-center space-x-6">
+            {% for card in cards %}
+            <a href="/accounts/cards/{{card.id}}" class="text-white bg-gradient-to-r {% if card.card_type == 'Visa' %}from-primary{% else %} from-orange-400{% endif %} to-secondary rounded-lg w-80 h-44 p-3 flex-col flex justify-between flex-none">
+                <div class="flex items-center relative w-full justify-between">
+                    <div class="space-y-1">
+                        <strong class="block text-sm">{{card.card_name}}</strong>
+                        <span class="text-xs font-normal block">{{card.card_number|slice:':4'}} **** **** {{card.card_number|slice:'-4:'}}</span>
+                    </div>
+                    <span class="iconify text-4xl" data-icon="{% if card.card_type == 'Visa' %}bxl:visa{% else %}uim:master-card{% endif %}"></span>
+                </div>
+
+                <div class="flex items-end justify-between">
+                    <strong class="text-3xl font-bold font-jost">
+                        {% with integer_part=card.account.balance|floatformat:'0' divisible_part=card.account.balance|floatformat:"2"|slice:"-3:" %}
+                        {{integer_part}}<span class="text-sm font-normal text-gray-200">{{divisible_part}} {{card.account.currency}}</span>
+                        {% endwith %}
+                    </strong>
+    
+                    <svg class="w-12 opacity-50" id="logosandtypes_com" data-name="logosandtypes com" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 150 150">
+                        <defs>
+                          <style>
+                            .cls-1 {
+                              fill: url(#linear-gradient-2);
+                            }
+                      
+                            .cls-2 {
+                              fill: none;
+                            }
+                      
+                            .cls-3 {
+                              fill: url(#linear-gradient);
+                            }
+                          </style>
+                          <linearGradient id="linear-gradient" x1="79.32" y1="77.12" x2="150.96" y2="-12.1" gradientTransform="translate(-40.51 105.49) scale(1 -1)" gradientUnits="userSpaceOnUse">
+                            <stop offset="0" stop-color="#d3d4d6"/>
+                            <stop offset=".04" stop-color="#c2c3c5"/>
+                            <stop offset=".11" stop-color="#abacaf"/>
+                            <stop offset=".39" stop-color="#76757a"/>
+                            <stop offset=".86" stop-color="#cbccce"/>
+                            <stop offset="1" stop-color="#d3d4d6"/>
+                          </linearGradient>
+                          <linearGradient id="linear-gradient-2" x1="155.19" y1="-28.55" x2="155.19" y2="-4.94" gradientTransform="translate(-40.51 105.49) scale(1 -1)" gradientUnits="userSpaceOnUse">
+                            <stop offset="0" stop-color="#d3d4d6"/>
+                            <stop offset="1" stop-color="#909193"/>
+                          </linearGradient>
+                        </defs>
+                        <g id="Layer_3" data-name="Layer 3">
+                          <g id="Layer_2" data-name="Layer 2">
+                            <path id="Layer_3-2" data-name="Layer 3" class="cls-2" d="M0,0H150V150H0V0Z"/>
+                          </g>
+                        </g>
+                        <path class="cls-3" d="M74.59,109.78c-20.4,0-36.93-16.53-36.94-36.93,0-20.4,16.53-36.93,36.93-36.94,20.4,0,36.93,16.53,36.94,36.93,0,9.2-3.43,18.08-9.63,24.88l16.78,11.91c20.14-24.24,16.83-60.21-7.41-80.36-24.24-20.14-60.21-16.83-80.36,7.41-20.14,24.24-16.83,60.21,7.41,80.36,19.02,15.81,46.05,17.56,66.95,4.36,1.97-11.39-15.63-10.77-25.1-11.52-3.39,0-5.37-.09-5.57-.09Z"/>
+                        <path class="cls-1" d="M130.89,116.56s-6.75-5.86-12.46-6.52c-.33-.03-.67-.05-1.01-.04h-37.27c9.45,.76,18.34,4.82,25.1,11.46,0,0,0,.11,.03,.12,10.88,10.86,13.03,13.17,13.03,13.17h30.88l-18.31-18.2Z"/>
+                    </svg>
+                </div>
+
+            </a>
+            {% endfor %}
+            <div class="flex-none text-white bg-gradient-to-r from-primary to-secondary rounded-lg w-80 h-44 p-3 flex-col flex justify-between">
+                <div class="flex items-center relative w-full justify-between">
+                    <div class="space-y-1">
+                        <strong class="block text-sm">Visa Business</strong>
+                        <span class="text-xs font-normal block">1234 **** **** 2944</span>
+                    </div>
+                    <span class="iconify text-4xl" data-icon="bxl:visa"></span>
+                </div>
+
+                <strong class="text-3xl font-bold font-jost">
+                    520,450<span class="text-sm font-normal text-gray-200">.00 USD</span>
+                </strong>
+            </div>
+            <a href="" class="bg-white text-black p-7 h-14 w-14 flex items-center justify-center rounded-full">
+                <span class="iconify text-3xl text-black flex-none" data-icon="radix-icons:plus"></span>
+            </a>
+        </div>
+    </div>
+
+
+        {% comment %} accounts {% endcomment %}
+        <div class="space-y-2 w-full">
+            <div class="flex items-center justify-between space-x-5">
+                <h1 class="text-xl font-bold">
+                    Credits
+                </h1>
+    
+                <a href="" class="py-2 border border-secondary text-center px-6 rounded-lg">
+                    Take credits
+                </a>
+            </div>
+            <div class="max-h-[420px] overflow-y-auto scrollbar-hide  bg-white space-y-6 flex flex-col w-full rounded-lg p-3 justify-between">
+                {% for cred in credits %}
+                <div class="w-full  {% if not forloop.last %}border-b border-b-secondary/30{% endif %} flex items-center justify-between">
+                    <div class="flex flex-col space-y-3 md:w-3/4">
+                        <h2 class="text-base font-bold">{{cred.title}}</h2>
+                        <div class="relative w-full h-2 bg-gray-200 rounded">
+                            <div class="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-orange-300 rounded" style="width: {{cred.calculate_percentage_paid}}%;"></div>
+                        </div>
+                        <div class="flex items-center space-x-4 justify-between w-full">
+                            <span class="flex text-xs">it remains to repay: {{cred.remaining_payment}} {{cred.currency}}</span>
+                            <span class="flex text-xs">{{cred.amount}} {{cred.currency}}</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <span class="text-xs">Next Payment</span>
+                        <strong class="block">{{cred.amount_to_be_paid}} {{cred.currency}}</strong>
+                        <button class="w-24 bg-primary text-white px-4 py-2 rounded-lg">Pay</button>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="w-full flex items-center justify-between">
+                    <div class="flex flex-col space-y-3 md:w-3/4">
+                        <h2 class="text-base font-bold">Loan for Drilling bits and Driller</h2>
+                        <div class="relative w-full h-2 bg-gray-200 rounded">
+                            <div class="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-orange-300 rounded" style="width: 50%;"></div>
+                        </div>
+                        <div class="flex items-center space-x-4 justify-between w-full">
+                            <span class="flex text-xs">it remains to repay: 24,000 USD</span>
+                            <span class="flex text-xs">250,000 USD</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <span class="text-xs">Next Payment</span>
+                        <strong class="block">5 000 USD</strong>
+                        <button class="w-24 bg-primary text-white px-4 py-2 rounded-lg">Pay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+</section>
+
+<section class="w-full space-y-5 h-screen col-span-4 md:col-span-1 border-l-secondary/40 md:pl-6 pb-24 md:pb-16">
+    <div class="divide-y-2 space-y-4 py-6 px-4 bg-white rounded-lg shadow">
+        <a href="/accounts/transfers/?has_card=False&transaction_type=MOBILE_TOP_UP&international=False" class="hover:font-bold duration-300 ease-linear flex space-x-2">
+            <div class="rounded-full w-8 h-8 bg-primary flex items-center justify-center">
+                <span class="iconify text-base text-white" data-icon="fa6-solid:money-bill-transfer"></span>
+            </div>
+
+            <span class="pl-3">Transfers</span>
+        </a>
+
+
+        <a href="/accounts/transfers/?has_card=False&transaction_type=TRANSFER&international=True" class="pt-3 hover:font-bold duration-300 ease-linear flex space-x-2">
+            <div class="rounded-full w-8 h-8 bg-primary flex items-center justify-center">
+                <span class="iconify text-base text-white" data-icon="ri:secure-payment-line"></span>
+            </div>
+
+            <span class="pl-3">International Payments</span>
+        </a>
+    </div>
+
+    <div class="w-full h-full md:h-1/2 bg-white rounded-lg overflow-hidden p-2">
+        <!-- TradingView Widget BEGIN -->
+        <div class="tradingview-widget-container rounded-lg overflow-hidden pt-6">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+                {
+                    "feedMode": "all_symbols",
+                    "colorTheme": "light",
+                    "isTransparent": true,
+                    "displayMode": "regular",
+                    "width": "100%",
+                    "height": "100%",
+                    "locale": "en"
+                }
+            </script>
+        </div>
+        <!-- TradingView Widget END -->
+    </div>
+
+    <div x-data="app()" x-cloak class="">
+        <div class="shadow p-6 rounded-lg bg-white">
+          <div class="md:flex md:justify-between md:items-center">
+            <div>
+              <h2 class="text-xl text-gray-800 font-bold leading-tight">Revenue Chart</h2>
+              <p class="mb-2 text-gray-600 text-sm">Monthly Average</p>
+            </div>
+  
+            <!-- Legends -->
+            <div class="mb-4">
+              <div class="flex items-center">
+                <div class="w-2 h-2 bg-blue-600 mr-2 rounded-full"></div>
+                <div class="text-sm text-gray-700">Influx</div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="line my-8 relative">
+            <!-- Tooltip -->
+            <template x-if="tooltipOpen == true">
+              <div x-ref="tooltipContainer" class="p-0 m-0 z-10 shadow-lg rounded-lg absolute h-auto block" :style="`bottom: ${tooltipY}px; left: ${tooltipX}px`">
+                <div class="shadow-xs rounded-lg bg-white p-2">
+                  <div class="flex items-center justify-between text-sm">
+                    <div>Sales:</div>
+                    <div class="font-bold ml-2">
+                      <span x-html="tooltipContent"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+  
+            <!-- Bar Chart -->
+            <div class="flex -mx-2 items-end mb-2">
+              <template x-for="data in chartData">
+  
+                <div class="px-2 w-1/6">
+                  <div :style="`height: ${data}px`" class="transition ease-in duration-200 bg-blue-600 hover:bg-blue-400 relative" @mouseenter="showTooltip($event); tooltipOpen = true" @mouseleave="hideTooltip($event)">
+                    <div x-text="data" class="text-center absolute top-0 left-0 right-0 -mt-6 text-gray-800 text-sm"></div>
+                  </div>
+                </div>
+  
+              </template>
+            </div>
+  
+            <!-- Labels -->
+            <div class="border-t border-gray-400 mx-auto" :style="`height: 1px; width: ${ 100 - 1/chartData.length*100 + 3}%`"></div>
+            <div class="flex -mx-2 items-end">
+              <template x-for="data in labels">
+                <div class="px-2 w-1/6">
+                  <div class="bg-red-600 relative">
+                    <div class="text-center absolute top-0 left-0 right-0 h-2 -mt-px bg-gray-400 mx-auto" style="width: 1px"></div>
+                    <div x-text="data" class="text-center absolute top-0 left-0 right-0 mt-3 text-gray-700 text-sm"></div>
+                  </div>
+                </div>
+              </template>
+            </div>
+  
+          </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block inlineScript %}
+<script>
+    function app() {
+      return {
+        chartData: [112, 10, 225, 134, 101, 80, 50, 100, 200],
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+        tooltipContent: '',
+        tooltipOpen: false,
+        tooltipX: 0,
+        tooltipY: 0,
+        showTooltip(e) {
+          console.log(e);
+          this.tooltipContent = e.target.textContent
+          this.tooltipX = e.target.offsetLeft - e.target.clientWidth;
+          this.tooltipY = e.target.clientHeight + e.target.clientWidth;
+        },
+        hideTooltip(e) {
+          this.tooltipContent = '';
+          this.tooltipOpen = false;
+          this.tooltipX = 0;
+          this.tooltipY = 0;
+        }
+      }
+    }
+  </script>
+{% endblock inlineScript %}

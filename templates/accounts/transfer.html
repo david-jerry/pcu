@@ -1,0 +1,430 @@
+{% extends '__dashbase.html' %}
+
+{% block title %}New Payment Order | {{card.card_number}} {{ block.super }}{% endblock title %}
+
+{% block hero %}
+{% if card %}
+  
+<div class="bg-primary relative h-52 w-screen px-4 md:px-24">
+    <div class="container mx-auto relative pt-24">
+        <div class="md:flex md:items-start flex-col md:flex-row items-start md:space-x-4 md:space-y-0 space-y-2">
+            <div class="text-white bg-gradient-to-r {% if card.card_type == 'Visa' %}from-primary{% else %} from-orange-400{% endif %} to-secondary rounded-lg md:w-80 mx-auto md:mx-0 h-44 p-3 flex-col flex justify-between flex-none">
+                <div class="flex items-center relative w-full justify-between">
+                    <div class="space-y-1">
+                        <strong class="block text-sm">{{card.card_name}}</strong>
+                        <span class="text-xs font-normal block">{{card.card_number|slice:':4'}} **** **** {{card.card_number|slice:'-4:'}}</span>
+                    </div>
+                    <span class="iconify text-4xl" data-icon="{% if card.card_type == 'Visa' %}bxl:visa{% else %}uim:master-card{% endif %}"></span>
+                </div>
+        
+                <div class="flex items-end justify-between">
+                    <strong class="text-3xl font-bold font-jost">
+                        {% with integer_part=card.account.balance|floatformat:'0' divisible_part=card.account.balance|floatformat:"2"|slice:"-3:" %}
+                        {{integer_part}}<span class="text-sm font-normal text-gray-200">{{divisible_part}} {{account.currency}}</span>
+                        {% endwith %}
+                    </strong>
+                    <svg class="w-12 opacity-50" id="logosandtypes_com" data-name="logosandtypes com" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 150 150">
+                        <defs>
+                          <style>
+                            .cls-1 {
+                              fill: url(#linear-gradient-2);
+                            }
+                      
+                            .cls-2 {
+                              fill: none;
+                            }
+                      
+                            .cls-3 {
+                              fill: url(#linear-gradient);
+                            }
+                          </style>
+                          <linearGradient id="linear-gradient" x1="79.32" y1="77.12" x2="150.96" y2="-12.1" gradientTransform="translate(-40.51 105.49) scale(1 -1)" gradientUnits="userSpaceOnUse">
+                            <stop offset="0" stop-color="#d3d4d6"/>
+                            <stop offset=".04" stop-color="#c2c3c5"/>
+                            <stop offset=".11" stop-color="#abacaf"/>
+                            <stop offset=".39" stop-color="#76757a"/>
+                            <stop offset=".86" stop-color="#cbccce"/>
+                            <stop offset="1" stop-color="#d3d4d6"/>
+                          </linearGradient>
+                          <linearGradient id="linear-gradient-2" x1="155.19" y1="-28.55" x2="155.19" y2="-4.94" gradientTransform="translate(-40.51 105.49) scale(1 -1)" gradientUnits="userSpaceOnUse">
+                            <stop offset="0" stop-color="#d3d4d6"/>
+                            <stop offset="1" stop-color="#909193"/>
+                          </linearGradient>
+                        </defs>
+                        <g id="Layer_3" data-name="Layer 3">
+                          <g id="Layer_2" data-name="Layer 2">
+                            <path id="Layer_3-2" data-name="Layer 3" class="cls-2" d="M0,0H150V150H0V0Z"/>
+                          </g>
+                        </g>
+                        <path class="cls-3" d="M74.59,109.78c-20.4,0-36.93-16.53-36.94-36.93,0-20.4,16.53-36.93,36.93-36.94,20.4,0,36.93,16.53,36.94,36.93,0,9.2-3.43,18.08-9.63,24.88l16.78,11.91c20.14-24.24,16.83-60.21-7.41-80.36-24.24-20.14-60.21-16.83-80.36,7.41-20.14,24.24-16.83,60.21,7.41,80.36,19.02,15.81,46.05,17.56,66.95,4.36,1.97-11.39-15.63-10.77-25.1-11.52-3.39,0-5.37-.09-5.57-.09Z"/>
+                        <path class="cls-1" d="M130.89,116.56s-6.75-5.86-12.46-6.52c-.33-.03-.67-.05-1.01-.04h-37.27c9.45,.76,18.34,4.82,25.1,11.46,0,0,0,.11,.03,.12,10.88,10.86,13.03,13.17,13.03,13.17h30.88l-18.31-18.2Z"/>
+                    </svg>
+    
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center space-x-6 justify-between">
+                    <a href="" class="py-2 px-6 rounded-lg bg-white text-red-5-- text-base">New Payment</a>
+                    <a href="/accounts/transfers/?card_id={{card.id}}&transaction_type=TRANSFER" class="py-2 px-6 rounded-lg border-2 border-secondary md:border-white text-secondary md:text-white text-base">Transfer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+{% endif %}
+{% endblock hero %}
+
+
+{% block content %}
+<section class=" h-screen md:col-span-4 col-span-4 space-y-7 pb-8 pt-12">
+    <div class="space-y-2 w-full">
+        <h1 class="text-3xl font-bold">
+            New {% if international != 'False' or not international %}International{% endif %} Payment Order
+        </h1>
+        <div class="md:flex w-full py-2 shadow-sm md:space-x-5 md:space-y-0 space-y-4 pb-24 md:pb-0">
+            <div class="bg-white space-y-3 rounded-lg p-3 w-full flex-none px-5">
+                <form x-data="{ input1: '', input2: '', input3: '', input4: '', submitting: false, pin: ''}" x-init="
+                $watch('input1', (value) => { if (value.length === 1) inputChanged(1); });
+                $watch('input2', (value) => { if (value.length === 1) inputChanged(2); });
+                $watch('input3', (value) => { if (value.length === 1) inputChanged(3); });
+                $watch('input4', (value) => { if (value.length === 1) inputChanged(4); });
+            " action="." method="post" class="flex flex-col space-y-4 py-6">
+                    {% csrf_token %}
+                    <div class="flex md:flex-row flex-col md:space-x-24 md:space-y-0 space-y-5">
+                        <div class="text-sm text-container/40 text-left md:w-24">Recipient</div>
+                        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="w-full">
+                                <input required class="flex w-full rounded-lg border-2 border-gray-200 text-gray-200 text-sm font-semibold focus:text-secondary form-input" type="text" name="receiver_name" id="id_receiver_name" placeholder="Recipient Name">
+                            </div>
+                            <div class="w-full">
+                                <input required class="flex w-full rounded-lg border-2 border-gray-200 text-gray-200 text-sm font-semibold focus:text-secondary form-input" type="text" name="receiver_account_number" id="id_receiver_account_number" placeholder="Recipient Account Number">
+                            </div>
+                            <div class="w-full">
+                                {% if international != 'False' or not international %}
+                                <input required class="flex w-full rounded-lg border-2 border-gray-200 text-gray-200 text-sm font-semibold focus:text-secondary form-input" type="text" name="bank" id="id_bank" placeholder="International Bank Name">
+                                {% else %}
+                                <select class="flex w-full rounded-lg border-2 border-gray-200 text-gray-200 text-sm font-semibold focus:text-secondary form-select" id="id_bank" name="bank">
+                                    <option value="">Recipient Bank</option>
+                                    <option value="self">Self</option>
+                                    <option value="chase">JPMorgan Chase Bank</option>
+                                    <option value="bofa">Bank of America</option>
+                                    <option value="wellsfargo">Wells Fargo Bank</option>
+                                    <option value="citibank">Citibank</option>
+                                    <option value="usbank">U.S. Bank</option>
+                                    <option value="pnc">PNC Bank</option>
+                                    <option value="tdbank">TD Bank</option>
+                                    <option value="capitalone">Capital One</option>
+                                    <option value="regions">Regions Bank</option>
+                                    <option value="ally">Ally Bank</option>
+                                    <option value="hsbc">HSBC Bank USA</option>
+                                    <option value="suntrust">SunTrust Bank</option>
+                                    <option value="bbt">BB&T (Truist Financial)</option>
+                                    <option value="fifththird">Fifth Third Bank</option>
+                                    <option value="synchrony">Synchrony Bank</option>
+                                    <option value="morganstanley">Morgan Stanley Bank</option>
+                                    <option value="discover">Discover Bank</option>
+                                    <option value="americanexpress">American Express National Bank</option>
+                                    <option value="charleschwab">Charles Schwab Bank</option>
+                                    <option value="citizens">Citizens Bank</option>
+                                    <option value="bbva">BBVA USA</option>
+                                    <option value="keybank">KeyBank</option>
+                                    <option value="barclays">Barclays Bank Delaware</option>
+                                    <option value="unionbank">MUFG Union Bank</option>
+                                    <option value="comerica">Comerica Bank</option>
+                                    <option value="pnc">PNC Bank</option>
+                                    <option value="ally">Ally Bank</option>
+                                    <option value="regions">Regions Bank</option>
+                                    <option value="ally">Ally Bank</option>
+                                    <option value="bmo">BMO Harris Bank</option>
+                                    <option value="merrick">Merrick Bank</option>
+                                    <option value="citizens">Citizens Bank</option>
+                                    <option value="frost">Frost Bank</option>
+                                    <option value="firstcitizens">First Citizens Bank</option>
+                                    <option value="synovus">Synovus Bank</option>
+                                    <option value="citi">CitiBank</option>
+                                    <option value="capitalone">Capital One</option>
+                                    <option value="discover">Discover Bank</option>
+                                    <option value="hsbc">HSBC Bank</option>
+                                    <option value="usbank">U.S. Bank</option>
+                                    <option value="wellsfargo">Wells Fargo Bank</option>
+                                    <option value="chase">Chase Bank</option>
+                                    <option value="amex">American Express National Bank</option>
+                                    <option value="pnc">PNC Bank</option>
+                                    <option value="citizens">Citizens Bank</option>
+                                    <option value="tdbank">TD Bank</option>
+                                    <option value="ally">Ally Bank</option>
+                                    <option value="regions">Regions Bank</option>
+                                    <option value="capitalone">Capital One</option>
+                                    <option value="suntrust">SunTrust Bank</option>
+                                    <option value="bbt">BB&T (Truist Financial)</option>
+                                    <option value="fifththird">Fifth Third Bank</option>
+                                    <option value="synchrony">Synchrony Bank</option>
+                                    <option value="morganstanley">Morgan Stanley Bank</option>
+                                    <option value="discover">Discover Bank</option>
+                                    <option value="americanexpress">American Express National Bank</option>
+                                    <option value="charleschwab">Charles Schwab Bank</option>
+                                    <option value="citizens">Citizens Bank</option>
+                                    <option value="bbva">BBVA USA</option>
+                                    <option value="keybank">KeyBank</option>
+                                    <option value="barclays">Barclays Bank Delaware</option>
+                                    <option value="unionbank">MUFG Union Bank</option>
+                                    <option value="comerica">Comerica Bank</option>
+                                    <option value="pnc">PNC Bank</option>
+                                    <option value="ally">Ally Bank</option>
+                                    <option value="regions">Regions Bank</option>
+                                    <option value="ally">Ally Bank</option>
+                                    <option value="bmo">BMO Harris Bank</option>
+                                    <option value="merrick">Merrick Bank</option>
+                                    <option value="citizens">Citizens Bank</option>
+                                    <option value="frost">Frost Bank</option>
+                                    <option value="firstcitizens">First Citizens Bank</option>
+                                    <option value="synovus">Synovus Bank</option>
+                                    <option value="eastwest">East West Bank</option>
+                                    <option value="huntington">Huntington National Bank</option>
+                                    <option value="svb">Silicon Valley Bank</option>
+                                    <option value="zion">Zions Bank</option>
+                                    <option value="commerce">Commerce Bank</option>
+                                    <option value="easternbank">Eastern Bank</option>
+                                    <option value="associatedbank">Associated Bank</option>
+                                    <option value="firstnational">First National Bank</option>
+                                    <option value="webster">Webster Bank</option>
+                                    <option value="peoplesunited">People's United Bank</option>
+                                    <option value="tcf">TCF Bank</option>
+                                    <option value="firstrepublic">First Republic Bank</option>
+                                    <option value="umb">UMB Bank</option>
+                                    <option value="wintrust">Wintrust Bank</option>
+                                    <option value="renasant">Renasant Bank</option>
+                                    <option value="cadence">Cadence Bank</option>
+                                    <option value="frost">Frost Bank</option>
+                                    <option value="firstcitizens">First Citizens Bank</option>
+                                    <option value="synovus">Synovus Bank</option>
+                                    <option value="prosperity">Prosperity Bank</option>
+                                    <option value="fulton">Fulton Bank</option>
+                                    <option value="bankunited">BankUnited</option>
+                                    <option value="wesbanco">WesBanco Bank</option>
+                                    <option value="bokfinancial">BOK Financial</option>
+                                    <option value="cadence">Cadence Bank</option>
+                                    <option value="unitedbank">United Bank</option>
+                                    <option value="arvest">Arvest Bank</option>
+                                    <option value="ibc">International Bank of Commerce</option>
+                                    <option value="bremer">Bremer Bank</option>
+                                    <option value="banner">Banner Bank</option>
+                                    <option value="oldnational">Old National Bank</option>
+                                    <option value="bankofhope">Bank of Hope</option>
+                                    <option value="northwest">Northwest Bank</option>
+                                    <option value="tcf">TCF Bank</option>
+                                    <option value="eastern">Eastern Bank</option>
+                                    <option value="ibc">IBC Bank</option>
+                                    <option value="fulton">Fulton Bank</option>
+                                    <option value="busey">Busey Bank</option>
+                                    <option value="cathay">Cathay Bank</option>
+                                    <option value="umb">UMB Bank</option>
+                                    <option value="legacytexas">LegacyTexas Bank</option>
+                                    <option value="sandy">Sandy Spring Bank</option>
+                                    <option value="ibc">IBC Bank</option>
+                                    <option value="hillcrest">Hillcrest Bank</option>
+                                    <option value="renasant">Renasant Bank</option>
+                                    <option value="bankozarks">Bank of the Ozarks</option>
+                                    <option value="oldnational">Old National Bank</option>
+                                    <option value="bankofhope">Bank of Hope</option>
+                                    <option value="firsttennessee">First Tennessee Bank</option>
+                                    <option value="frost">Frost Bank</option>
+                                    <option value="firstcitizens">First Citizens Bank</option>
+                                    <option value="synovus">Synovus Bank</option>
+                                    <option value="prosperity">Prosperity Bank</option>
+                                    <option value="fulton">Fulton Bank</option>
+                                    <option value="bankunited">BankUnited</option>
+                                    <option value="wesbanco">WesBanco Bank</option>
+                                    <option value="bokfinancial">BOK Financial</option>
+                                    <option value="cadence">Cadence Bank</option>
+                                    <option value="unitedbank">United Bank</option>
+                                    <option value="arvest">Arvest Bank</option>
+                                    <option value="ibc">International Bank of Commerce</option>
+                                    <option value="bremer">Bremer Bank</option>
+                                    <option value="banner">Banner Bank</option>
+                                    <option value="oldnational">Old National Bank</option>
+                                    <option value="bankofhope">Bank of Hope</option>
+                                    <option value="northwest">Northwest Bank</option>
+                                    <option value="tcf">TCF Bank</option>
+                                    <option value="eastern">Eastern Bank</option>
+                                    <option value="ibc">IBC Bank</option>
+                                    <option value="fulton">Fulton Bank</option>
+                                    <option value="busey">Busey Bank</option>
+                                    <option value="cathay">Cathay Bank</option>
+                                    <option value="umb">UMB Bank</option>
+                                    <option value="legacytexas">LegacyTexas Bank</option>
+                                    <option value="sandy">Sandy Spring Bank</option>
+                                    <option value="ibc">IBC Bank</option>
+                                    <option value="hillcrest">Hillcrest Bank</option>
+                                    <option value="renasant">Renasant Bank</option>
+                                    <option value="bankozarks">Bank of the Ozarks</option>
+                                    <option value="oldnational">Old National Bank</option>
+                                    <option value="bankofhope">Bank of Hope</option>
+                                    <option value="firsttennessee">First Tennessee Bank</option>
+                                    <!-- Add more options as needed -->
+                                </select>                                
+                                {% endif %}
+                            </div>
+                            <div class="w-full">
+                                <input required type="text" name="reason" id="id_reason" class="form-input w-full text-sm text-secondary font-semibold placeholder:text-base rounded-lg border-secondary/40" placeholder="Reason">
+                            </div>
+                            <div class="w-full">
+                                <select name="transaction_type" id="id_transaction_type" class="form-input w-full text-sm text-secondary font-semibold placeholder:text-base rounded-lg border-secondary/40" placeholder="Reason">
+                                    <option value="">TRANNSACTION TYPE</option>
+                                    <option value="TRANSFER">TRANSFER</option>
+                                    <option value="MOBILE_TOP_UP">MOBILE TOP UP</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex md:flex-row flex-col md:space-x-24 md:space-y-0 space-y-5">
+                        <div class="text-sm text-container/40 text-left md:w-24">Yours</div>
+                        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="justify-between w-full md:col-span-2 rounded-lg bg-gray-300 py-2 px-4 flex md:flex-row flex-col md:space-y-0 space-y-2 items-center md:space-x-4">
+                                <div class="text-center md:text-left flex md:flex-row flex-col md:space-y-0 space-y-2 items-center space-x-5 flex-none">
+                                    <div class="flex-flex-col space-y-0 flex-none w-fit md:text-left">
+                                        <span class="block text-base font-bold">{{request.user.get_full_name}}</span>
+                                        <span class="block text-xs text-primary font-semibold">{{request.user.email}}</span>
+                                    </div>
+    
+                                    <div class="w-full">
+                                        <select name="account_id" id="id_account_id" class="form-input w-full text-sm text-secondary font-semibold placeholder:text-base rounded-lg border-secondary/40" placeholder="Reason">
+                                            {% for acc in accounts %}
+                                            <option value="{{acc.id}}">{{acc.account_number}} - {{ acc.currency }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+ 
+                                </div>
+
+                                <div class="w-full h-[2px] bg-secondary/40"></div>
+
+                                <strong class="flex-none block text-bold">
+                                    {{account.currency}}
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="py-12 flex md:flex-row flex-col md:space-x-24 md:space-y-0 space-y-5">
+                        <div class="text-sm text-container/40 text-left md:w-24">Amount</div>
+                        <div class="w-full flex items-end space-x-3">
+                            <input required type="number" step="0.01" name="amount" id="id_amount" class="w-full md:max-w-md block rounded-lg border-gray-400   font-bold text-2xl md:text-3xl">
+                            <strong class="hidden md:block text-sm font-semibold text-gray-300">{{account.currency}}</strong>
+                        </div>
+                    </div>
+
+                    <button data-modal-target="defaultModal" data-modal-toggle="defaultModal" class="mb-14 bg-primary py-3 px-4 rounded-lg text-white font-semibold hover:bg-primary/40 duration-300 ease-linear" type="button">Transfer</button>
+
+                    <!-- Main modal -->
+                    <div id="defaultModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                        <div class="relative w-full max-w-2xl max-h-full">
+                            <!-- Modal content -->
+                            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                <!-- Modal header -->
+                                <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                        Confrim Transaction
+                                    </h3>
+                                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="defaultModal">
+                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <span class="sr-only">Close modal</span>
+                                    </button>
+                                </div>
+                                <!-- Modal body -->
+
+                                <script>
+                                    function inputChanged(step) {
+                                        const inputField = document.querySelector(`[x-ref=input${step}]`);
+                                        const userInput = inputField.value;
+                                        if (userInput.length === 1) {
+                                            if (checkAuthenticationCode()) {
+                                                // Perform authentication success action here
+                                                alert('Correct PIN');
+                                                this.submitting = true;
+                                            } else if (step < 4) {
+                                                // Focus on the next input field
+                                                const nextInputField = document.querySelector(`[x-ref=input${step + 1}]`);
+                                                nextInputField.focus();
+                                            } else {
+                                                resetFields();
+                                                const firstInputField = document.querySelector(`[x-ref=input1]`);
+                                                firstInputField.focus();
+                                                alert('Incorrect PIN');
+                                                this.submitting = false;
+                                                window.location.reload();
+                                            }
+                                        }
+                                    }
+                                
+                                    function checkAuthenticationCode() {
+                                        const input1 = document.querySelector(`[x-ref=input1]`).value;
+                                        const input2 = document.querySelector(`[x-ref=input2]`).value;
+                                        const input3 = document.querySelector(`[x-ref=input3]`).value;
+                                        const input4 = document.querySelector(`[x-ref=input4]`).value;
+                                        const enteredCode = input1 + input2 + input3 + input4;
+                                        return enteredCode === '{{account.pin}}'; // Replace with your authentication code
+                                    }
+
+                                    function resetFields() {
+                                        document.querySelector(`[x-ref=input1]`).value = '';
+                                        document.querySelector(`[x-ref=input2]`).value = '';
+                                        document.querySelector(`[x-ref=input3]`).value = '';
+                                        document.querySelector(`[x-ref=input4]`).value = '';
+                                    }
+                                </script>
+
+
+                                <div class="p-6 space-y-6">
+                                    <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                                        To protect your interest please confirm before sending this amount by providing your pin.
+                                    </p>
+                                    <div class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                                        <div class="flex items-center space-x-3">
+                                            <input
+                                                x-model="input1"
+                                                class="w-8 h-8 border p-2 rounded-lg text-center"
+                                                maxlength="1"
+                                                x-ref="input1"
+                                            >
+                                            <input
+                                                x-model="input2"
+                                                class="w-8 h-8 border p-2 rounded-lg text-center"
+                                                maxlength="1"
+                                                x-ref="input2"
+                                            >
+                                            <input
+                                                x-model="input3"
+                                                class="w-8 h-8 border p-2 rounded-lg text-center"
+                                                maxlength="1"
+                                                x-ref="input3"
+                                            >
+                                            <input
+                                                x-model="input4"
+                                                class="w-8 h-8 border p-2 rounded-lg text-center"
+                                                maxlength="1"
+                                                x-ref="input4"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Modal footer -->
+                                <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                                    <button x-bind:type="submitting ? 'button' : 'submit'" data-modal-hide="defaultModal" type="submit" class="text-white bg-primary hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">I accept</button>
+                                    <button data-modal-hide="defaultModal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Decline</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block inlinceScript %}
+{% endblock inlinceScript %}
