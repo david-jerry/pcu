@@ -3,7 +3,7 @@ django-browser-reload==1.11.0
 django-compressor==4.4
 python-decouple==3.8
 requests==2.31.0
-pillow==8.0.0
+pillow==10.0.1
 whitenoise==6.2.0  # https://github.com/evansd/whitenoise
 
 django-environ==0.10.0
