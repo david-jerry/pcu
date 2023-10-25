@@ -145,7 +145,7 @@ USE_TZ = True
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 STATIC_URL = '/static/'
-STATIC_ROOT = str(BASE_DIR / 'static')  # The folder where collectstatic command collects static files
+STATIC_ROOT = str(BASE_DIR / 'staticfiles')  # The folder where collectstatic command collects static files
 
 # Additional directories where static files can be found
 STATICFILES_DIRS = [
